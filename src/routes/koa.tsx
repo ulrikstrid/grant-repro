@@ -79,7 +79,7 @@ export default (provider: Provider) => {
     );
     const client = await provider.Client.find(params.client_id as string);
 
-    console.log(prompt, params, client);
+    console.log({prompt, params, client});
 
     switch (prompt.name) {
       case "login": {
@@ -98,7 +98,7 @@ export default (provider: Provider) => {
           }} />
         );
         ctx.body = body;
-        break;
+        return;
       }
       case "consent": {
         console.log("consent");
@@ -117,7 +117,7 @@ export default (provider: Provider) => {
           />
         );
         ctx.body = body;
-        break;
+        return;
       }
       default:
         return next();
@@ -132,14 +132,11 @@ export default (provider: Provider) => {
   });
 
   type login_submission = {
-    original_message: string;
-    message: string;
-    signature: string;
-    userAddress: string;
+    login: string;
+    password: string;
   };
 
   router.post("/interaction/:uid/login", body, async (ctx) => {
-    console.log("hit the route?");
     const {
       prompt: { name },
     } = await provider.interactionDetails(ctx.req, ctx.res);
@@ -147,13 +144,7 @@ export default (provider: Provider) => {
 
     const body: login_submission = ctx.request.body;
 
-    // TODO: Validate the following:
-    // original_message === uid
-    // signature is created by userAddress
-    // time is reasonably close to now
-    // message includes original message
-
-    const account = await Account.findByLogin(body.userAddress);
+    const account = await Account.findByLogin(body.login);
 
     console.log(account);
 
@@ -171,6 +162,7 @@ export default (provider: Provider) => {
   });
 
   router.post("/interaction/:uid/confirm", body, async (ctx) => {
+    console.log("confirm");
     const interactionDetails = await provider.interactionDetails(
       ctx.req,
       ctx.res

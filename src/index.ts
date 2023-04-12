@@ -14,15 +14,9 @@ const { PORT = 3000, ISSUER = `http://localhost:${PORT}` } = process.env;
 let server;
 
 try {
-  let adapter;
-  //if (process.env.MONGODB_URI) {
-  //({ default: adapter } = await import("./adapters/mongodb.js"));
-  //await adapter.connect();
-  //}
-
   const prod = process.env.NODE_ENV === "production";
 
-  const provider = new Provider(ISSUER, { adapter, ...configuration });
+  const provider = new Provider(ISSUER, configuration);
 
   const directives = helmet.contentSecurityPolicy.getDefaultDirectives();
   delete directives["form-action"];
